@@ -26,6 +26,7 @@ import org.folio.rest.jaxrs.model.Encumbrance;
 import org.folio.rest.jaxrs.model.OrderTransactionSummary;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.jaxrs.model.Transaction;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -246,6 +247,7 @@ public class TransactionTest extends TestBase {
 
 
   @Test
+  @Ignore("Need to rename and change approach to test negative available ammount")
   void testCreateTransferThatDoesNotHaveEnoughMoney() throws MalformedURLException {
 
     givenTestData(TRANSACTION_TENANT_HEADER,
