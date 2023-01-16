@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.model.RequestContext;
 import org.folio.rest.jaxrs.model.Transaction;
@@ -19,6 +20,7 @@ import org.folio.rest.persist.PgUtil;
 import org.folio.service.transactions.TransactionManagingStrategyFactory;
 import org.folio.service.transactions.TransactionService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
@@ -42,7 +44,7 @@ public class TransactionAPI implements FinanceStorageTransactions {
   @Validate
   public void getFinanceStorageTransactions(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.get(TRANSACTION_TABLE, Transaction.class, TransactionCollection.class, query, offset, limit, okapiHeaders, vertxContext,
+    PgUtil.get(TRANSACTION_TABLE, Transaction.class, TransactionCollection.class, updateCQLBasedOnRequest(query), offset, limit, okapiHeaders, vertxContext,
         GetFinanceStorageTransactionsResponse.class, asyncResultHandler);
   }
 
@@ -90,5 +92,9 @@ public class TransactionAPI implements FinanceStorageTransactions {
     return managingServiceFactory.findStrategy(transaction.getTransactionType());
   }
 
+  private String updateCQLBasedOnRequest(String query) {
+    String deletedFilter = "cql.allRecords=1 NOT deleted=true".concat(StringUtils.isNotBlank(query) ? " AND " : StringUtils.EMPTY);
+    return query.contains("deleted=") ? query : deletedFilter.concat(StringUtils.defaultString(query));
+  }
 
 }
