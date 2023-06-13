@@ -214,7 +214,8 @@ CREATE OR REPLACE FUNCTION ${myuniversity}_${mymodule}.rollover_order(_order_id 
         ELSEIF
            -- #10
            EXISTS (SELECT tr.jsonb as transaction FROM ${myuniversity}_${mymodule}.transaction tr
-                   INNER JOIN ${myuniversity}_${mymodule}.fund fund ON fund.id = tr.fromFundId
+                   LEFT JOIN ${myuniversity}_${mymodule}.fund fund ON fund.id = tr.fromFundId
+                   LEFT JOIN ${myuniversity}_${mymodule}.ledger_fiscal_year_rollover rollover ON rollover.ledgerId
            					 WHERE NOT EXISTS (SELECT * FROM ${myuniversity}_${mymodule}.ledger_fiscal_year_rollover_budget budget
            								 	WHERE tr.fromFundId=budget.fundId
            								 	  AND budget.fiscalYearId::text = _rollover_record->>'toFiscalYearId'
@@ -223,7 +224,6 @@ CREATE OR REPLACE FUNCTION ${myuniversity}_${mymodule}.rollover_order(_order_id 
                              AND tr.fromFundId=budget.fundId
                              AND budget.fiscalYearId::text = _rollover_record->>'toFiscalYearId'
                              AND rollover.jsonb IS NOT NULL)
-           					         AND _rollover_record->>'rolloverType' <> 'Preview'
            						AND tr.jsonb->'encumbrance'->>'sourcePurchaseOrderId'= _order_id
                                	AND tr.fiscalYearId::text= _rollover_record->>'fromFiscalYearId')
         THEN
